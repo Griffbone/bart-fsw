@@ -107,9 +107,9 @@
 enum icm45686_err {
   ICM45686_ERR_OK,
   ICM45686_ERR_VALUE
-}
+};
 
-struct iam20680ht_device {
+struct icm45686_device {
   uint8_t gyro_pwr_mode;
   uint8_t accel_pwr_mode; 
 
@@ -124,7 +124,7 @@ struct iam20680ht_device {
   uint16_t cs_gpio_pin;
 };
 
-enum icm45686_err icm45686_soft_reset(struct icm5686_devicce *device);
+enum icm45686_err icm45686_soft_reset(struct icm45686_device *device);
 
 enum icm45686_err icm45686_read_whoami(struct icm45686_device *device, uint8_t *whoami);
 
@@ -138,8 +138,8 @@ enum icm45686_err icm45686_read_temp(struct icm45686_device *device, double *tem
 
 enum icm45686_err icm45686_read_byte(struct icm45686_device *device, uint8_t addr, uint8_t *byte);
 
-enum icm45686_err icm45686_write_byte(struct icm45686_device *device, uint8_t addr, uint8_t *byte);
+enum icm45686_err icm45686_write_byte(struct icm45686_device *device, uint8_t addr, uint8_t byte);
 
-enum icm45686_err icm45686_delay_ms(struct icm45686_device *device);
+enum icm45686_err icm45686_delay_ms(uint16_t delay);
 
 #endif /* __ICM45686_H__ */

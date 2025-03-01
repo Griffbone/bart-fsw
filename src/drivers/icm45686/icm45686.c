@@ -1,17 +1,17 @@
 #include "icm45686.h"
 #include "stm32h7xx_hal.h"
 
-enum icm45686_err icm45686_soft_reset(struct icm5686_devicce *device) {
+enum icm45686_err icm45686_soft_reset(struct icm45686_device *device) {
   enum icm45686_err status;
 
   // Trigger soft reset
-  status icm45686_write_byte(device, ICM45686_REG_MISC2, ICM45686_SOFT_RESET);
+  status = icm45686_write_byte(device, ICM45686_REG_MISC2, ICM45686_SOFT_RESET);
   if (status != ICM45686_ERR_OK) {
     return status;
   }
 
   // Wait 1ms 
-  status = icm45686_sleep_ms(1);
+  status = icm45686_delay_ms(1);
   
   return status;
 }
@@ -32,7 +32,7 @@ enum icm45686_err icm45686_init(struct icm45686_device *device) {
   status = icm45686_soft_reset(device);
 
   if (status != ICM45686_ERR_OK) {
-    return status
+    return status;
   }
 
   // Read whoami register 
@@ -70,11 +70,11 @@ enum icm45686_err icm45686_init(struct icm45686_device *device) {
   return status;
 }
 
-enum icm45686_err icm45686_read_accel(struct icm45686_device *device, double accel_reading);
+enum icm45686_err icm45686_read_accel(struct icm45686_device *device, double *accel_reading);
 
-enum icm45686_err icm45686_read_gyro(struct icm45686_device *device, double gyro_reading);
+enum icm45686_err icm45686_read_gyro(struct icm45686_device *device, double *gyro_reading);
 
-enum icm45686_err icm45686_read_temp(struct icm45686_device *device, double gyro_reading);
+enum icm45686_err icm45686_read_temp(struct icm45686_device *device, double *temp);
 
 enum icm45686_err icm45686_read_byte(struct icm45686_device *device, uint8_t addr, uint8_t *byte) {
   uint8_t tx[2];
@@ -90,10 +90,10 @@ enum icm45686_err icm45686_read_byte(struct icm45686_device *device, uint8_t add
 
   *byte = rx[1];
 
-  return IAM20680HT_ERR_OK;
+  return ICM45686_ERR_OK;
 }
 
-enum icm45686_err icm45686_write_byte(struct icm45686_device *device, uint8_t addr, uint8_t *byte) {
+enum icm45686_err icm45686_write_byte(struct icm45686_device *device, uint8_t addr, uint8_t byte) {
   uint8_t tx[2];
 
   tx[0] = addr & 0x7F;
@@ -104,7 +104,7 @@ enum icm45686_err icm45686_write_byte(struct icm45686_device *device, uint8_t ad
   HAL_SPI_Transmit(device->hspi, tx, 2, HAL_MAX_DELAY);
   HAL_GPIO_WritePin(device->cs_gpio_port, device->cs_gpio_pin, GPIO_PIN_SET);
 
-  return IAM20680HT_ERR_OK;
+  return ICM45686_ERR_OK;
 }
 
 enum icm45686_err icm45686_delay_ms(uint16_t delay) {

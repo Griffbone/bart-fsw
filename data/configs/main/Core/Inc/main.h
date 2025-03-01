@@ -105,8 +105,11 @@ void Error_Handler(void);
 #define SPI3_CS1_GPIO_Port GPIOD
 #define SPI3_CS2_Pin GPIO_PIN_4
 #define SPI3_CS2_GPIO_Port GPIOB
+#define SD_CS_Pin GPIO_PIN_4
+#define SD_CS_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
+#define SD_SPI_HANDLE hspi3
 
 /* USER CODE END Private defines */
 
