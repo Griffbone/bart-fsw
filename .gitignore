@@ -1,0 +1,6 @@
+/build/
+/src/system/
+/src/fatfs/
+/external/
+/Makefile
+.vscode
