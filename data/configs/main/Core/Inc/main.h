@@ -108,6 +108,11 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #define SD_SPI_HANDLE hspi3
+#define SD_CS_GPIO_Port GPIO_PIN_4
+#define SD_CS_Pin GPIOB
+
+//Make sure you set #define SD_CS_GPIO_Port as some GPIO port in main.h
+//Make sure you set #define SD_CS_Pin as some GPIO pin in main.h
 
 /* USER CODE END Private defines */
 

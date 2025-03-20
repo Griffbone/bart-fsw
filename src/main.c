@@ -19,7 +19,7 @@ extern DMA_HandleTypeDef hdma_usart1_rx; // TODO: idk if this should be usart ou
 volatile uint8_t cli_uart_rx_data[256];
 volatile uint8_t is_cli_uart_rx_data_available;
 struct cli_handle cli;
-struct cli_handle telemetry_cli;
+// struct cli_handle telemetry_cli;
 
 int main(void) {
   init(); 
