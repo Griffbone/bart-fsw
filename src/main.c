@@ -15,7 +15,7 @@
 #include "drivers/icm45686/icm45686.h"
 
 // Setup CLI
-extern DMA_HandleTypeDef hdma_usart6_rx;
+extern DMA_HandleTypeDef hdma_usart1_rx; // TODO: idk if this should be usart our uart
 volatile uint8_t cli_uart_rx_data[256];
 volatile uint8_t is_cli_uart_rx_data_available;
 struct cli_handle cli;
@@ -25,7 +25,7 @@ int main(void) {
   init(); 
 
   // Initialize debug CLI
-  cli_init(&cli, &huart6);
+  cli_init(&cli, &huart1);
   command_init(&cli);
   memset((void *)cli_uart_rx_data, 0, sizeof(cli_uart_rx_data));
 
@@ -34,6 +34,8 @@ int main(void) {
     HAL_Delay(250);
     HAL_GPIO_WritePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin, GPIO_PIN_RESET);
     HAL_Delay(250);
+
+    // cli_transmit(&cli, "hello world\r\n");  
   
     // CLI Handling
     if (is_cli_uart_rx_data_available != 0) {
@@ -51,9 +53,9 @@ int main(void) {
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
   // CLI callback
-  if (huart->Instance == USART6) {
+  if (huart->Instance == USART1) {
     is_cli_uart_rx_data_available = 1;
-    HAL_UARTEx_ReceiveToIdle_IT(&huart6, (uint8_t *)cli_uart_rx_data,
+    HAL_UARTEx_ReceiveToIdle_IT(&huart1, (uint8_t *)cli_uart_rx_data,
                                 sizeof(cli_uart_rx_data));
   }
 }
