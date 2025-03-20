@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "fatfs.h"
 #include "i2c.h"
 #include "octospi.h"
@@ -90,7 +91,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_OCTOSPI1_Init();
+  MX_DMA_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
   MX_USART2_UART_Init();
@@ -101,6 +102,7 @@ int main(void)
   MX_UART8_Init();
   MX_USART1_UART_Init();
   MX_I2C2_Init();
+  MX_OCTOSPI1_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
