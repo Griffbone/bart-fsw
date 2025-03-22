@@ -20,7 +20,7 @@ GPIO_TypeDef *FIRE_PORTS[6] = {
     FIRE_6_GPIO_Port
 };
 
-static const uint16_t FIRE_PORTS[6] = {
+static const uint16_t SENSE_PINS[6] = {
     SENSE_1_Pin, 
     SENSE2_Pin,         // TODO: fix this in cubemx
     SENSE_3_Pin, 
@@ -38,7 +38,6 @@ GPIO_TypeDef *SENSE_PORTS[6] = {
     SENSE_6_GPIO_Port
 };
 
-
 enum pyro_err pyro_init() {
     for (uint8_t i = 0; i < 5; i++) {
         HAL_GPIO_WritePin(FIRE_PORTS[i], FIRE_PINS[i], GPIO_PIN_RESET);
@@ -47,7 +46,7 @@ enum pyro_err pyro_init() {
     return PYRO_ERR_OK;
 }
 
-enum pyro_err pyro_test(struct pyro_device *device) {
+enum pyro_err pyro_test() {
     uint8_t ret;
 
     for (uint8_t channel = 1; channel < 7; channel++) {
