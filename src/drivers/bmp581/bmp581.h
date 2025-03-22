@@ -58,8 +58,8 @@ struct bmp581_device {
 enum bmp581_err bmp581_init(struct bmp581_device *device);
 enum bmp581_err bmp581_soft_reset(struct bmp581_device *device);
 
-enum bmp581_err bmp581_rad_temp(struct bmp581_device *device, float temp);
-enum bmp581_err bmp581_read_press(struct bmp581_device *device, float press);
+enum bmp581_err bmp581_read_temp(struct bmp581_device *device, float *temp);
+enum bmp581_err bmp581_read_press(struct bmp581_device *device, float *press);
 
 enum bmp581_err bmp581_write_byte(struct bmp581_device *device, uint8_t reg, uint8_t data);
 enum bmp581_err bmp581_read_byte(struct bmp581_device *device, uint8_t reg, uint8_t *data);
