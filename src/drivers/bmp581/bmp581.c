@@ -22,17 +22,19 @@ enum bmp581_err bmp581_read_byte(struct bmp581_device *device, uint8_t reg, uint
     uint8_t rx;
     uint8_t ret;
 
-    ret = HAL_I2C_Master_Transmit(device->hi2c, device->i2c_addr << 1, reg, 1, HAL_MAX_DELAY);
+    ret = HAL_I2C_Master_Transmit(device->hi2c, device->i2c_addr << 1, &reg, 1, HAL_MAX_DELAY);
 
     if (ret != HAL_OK) {
       return BMP581_ERR_HAL;
     }
 
-    ret = HAL_I2C_Master_Receive(device->hi2c, device->i2c_addr << 1, rx, 1, HAL_MAX_DELAY);
+    ret = HAL_I2C_Master_Receive(device->hi2c, device->i2c_addr << 1, &rx, 1, HAL_MAX_DELAY);
   
     if (ret != HAL_OK) {
         return BMP581_ERR_HAL;
     }
+
+    *data = rx;
 
     return BMP581_ERR_OK;
 }
