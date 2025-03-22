@@ -10,15 +10,18 @@ enum bmp581_err bmp581_init(struct bmp581_device *device) {
     // Wait t_powerup
     bmp581_delay(3);
 
-    // Check chip ID is not zero
-    bmp581_read_byte(device, BMP581_REG_CHIP_ID, buf);
+    // Soft reset
+    bmp581_soft_reset(device);
 
-    if (buf != 0) {
+    // Check chip ID is not zero
+    bmp581_read_byte(device, BMP581_REG_CHIP_ID, &buf);
+
+    if (buf == 0) {
         return BMP581_ERR_GENERAL;
     }
     
     // Check status register
-    bmp581_read_byte(device, BMP581_REG_CHIP_STATUS, buf);
+    bmp581_read_byte(device, BMP581_REG_CHIP_STATUS, &buf);
     uint8_t status_nvm_ready = (buf >> 1) && 0x01;
     uint8_t status_nvm_err = (buf >> 2) && 0x01;
     
@@ -27,11 +30,11 @@ enum bmp581_err bmp581_init(struct bmp581_device *device) {
     }
 
     // Read interrupt status register
-    bmp581_read_byte(device, BMP581_REG_INT_STATUS, buf);
+    bmp581_read_byte(device, BMP581_REG_INT_STATUS, &buf);
     uint8_t int_status_por = (buf >> 4) && 0x01;
 
     if (int_status_por != 1) {
-        return BMP581_ERR_GENERAL;
+        return buf;
     }
 
     // Enter standby mode 
@@ -57,26 +60,26 @@ enum bmp581_err bmp581_soft_reset(struct bmp581_device *device) {
     return BMP581_ERR_OK;
 }
 
-enum bmp581_err bmp581_rad_temp(struct bmp581_device *device, float temp) {
+enum bmp581_err bmp581_read_temp(struct bmp581_device *device, float *temp) {
     uint8_t buf[3]; 
     int32_t temp_raw; 
 
     bmp581_read_block(device, BMP581_REG_TEMP_XLSB, 3, buf);
 
     temp_raw = ((buf[2] << 16) | (buf[1] << 8) | buf[0]);
-    temp = temp_raw/65536.0f;
+    *temp = temp_raw/65536.0f;
     
     return BMP581_ERR_OK;
 }
 
-enum bmp581_err bmp581_read_press(struct bmp581_device *device, float press) {
+enum bmp581_err bmp581_read_press(struct bmp581_device *device, float *press) {
     uint8_t buf[3];
     int32_t press_raw;
 
     bmp581_read_block(device, BMP581_REG_PRESS_XLSB, 3, buf);
 
     press_raw = ((buf[2] << 16) | (buf[1] << 8) | buf[0]);
-    press = press_raw/64.0f;
+    *press = press_raw/64.0f;
 
     return BMP581_ERR_OK;
 }
@@ -87,7 +90,7 @@ enum bmp581_err bmp581_write_byte(struct bmp581_device *device, uint8_t reg, uin
     tx[0] = reg;
     tx[1] = data;
 
-    ret = HAL_I2C_Master_Transmit(device->hi2c, device->i2c_addr << 1, &tx, 2, HAL_MAX_DELAY);
+    ret = HAL_I2C_Master_Transmit(device->hi2c, device->i2c_addr << 1, tx, 2, HAL_MAX_DELAY);
 
     if (ret != HAL_OK) {
         return BMP581_ERR_HAL;
@@ -130,7 +133,7 @@ enum bmp581_err bmp581_read_block(struct bmp581_device *device, uint8_t start_re
 }
 
 enum bmp581_err bmp581_delay(uint32_t ms) {
-    HAL_Delay(delay);
+    HAL_Delay(ms);
 
     return BMP581_ERR_OK;
 }

@@ -38,6 +38,9 @@ int main(void) {
   baro.i2c_addr = 0x47;
   baro.hi2c = &hi2c2;
   uint8_t buf;
+  uint8_t status = bmp581_init(&baro);
+  float temp;
+  float press;
 
   while(1) {
     HAL_GPIO_WritePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin, GPIO_PIN_SET);
@@ -45,12 +48,15 @@ int main(void) {
     HAL_GPIO_WritePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin, GPIO_PIN_RESET);
     HAL_Delay(250);
 
-    bmp581_read_byte(&baro, BMP581_REG_ASIC_ID, &buf);
+    bmp581_read_temp(&baro, &temp);
+    bmp581_read_press(&baro, &press);
+    // bmp581_read_byte(&baro, BMP581_REG_CHIP_ID, &buf);
     // HAL_I2C_Master_Transmit(baro.hi2c, baro.i2c_addr << 1, 0x01, 1, HAL_MAX_DELAY);
     // HAL_I2C_Master_Receive(baro.hi2c, baro.i2c_addr << 1, &buf, 1, HAL_MAX_DELAY);
 
     // HAL_I2C_Mem_Read(baro.hi2c, baro.i2c_addr << 1, BMP581_REG_ASIC_ID, 1, &buf, 1, HAL_MAX_DELAY);
-    cli_transmit(&cli, "%x\r\n", buf);
+    // cli_transmit(&cli, "%x\r\n", status);
+    cli_transmit(&cli, "%.2f %.2f \r\n", temp, press);
 
     // cli_transmit(&cli, "hello world\r\n");  
     // CLI Handling
