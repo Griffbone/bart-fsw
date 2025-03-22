@@ -10,9 +10,11 @@
 #include "system/init.h"
 #include "system/spi.h"
 #include "system/usart.h"
+#include "system/i2c.h"
 
 // Device drivers
 #include "drivers/icm45686/icm45686.h"
+#include "drivers/bmp581/bmp581.h"
 
 // Setup CLI
 extern DMA_HandleTypeDef hdma_usart1_rx; // TODO: idk if this should be usart our uart
@@ -20,6 +22,9 @@ volatile uint8_t cli_uart_rx_data[256];
 volatile uint8_t is_cli_uart_rx_data_available;
 struct cli_handle cli;
 // struct cli_handle telemetry_cli;
+
+// Device structures 
+struct bmp581_device baro;
 
 int main(void) {
   init(); 
@@ -29,14 +34,25 @@ int main(void) {
   command_init(&cli);
   memset((void *)cli_uart_rx_data, 0, sizeof(cli_uart_rx_data));
 
+  // Initialize barometer 
+  baro.i2c_addr = 0x47;
+  baro.hi2c = &hi2c2;
+  uint8_t buf;
+
   while(1) {
     HAL_GPIO_WritePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin, GPIO_PIN_SET);
     HAL_Delay(250);
     HAL_GPIO_WritePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin, GPIO_PIN_RESET);
     HAL_Delay(250);
 
+    bmp581_read_byte(&baro, BMP581_REG_ASIC_ID, &buf);
+    // HAL_I2C_Master_Transmit(baro.hi2c, baro.i2c_addr << 1, 0x01, 1, HAL_MAX_DELAY);
+    // HAL_I2C_Master_Receive(baro.hi2c, baro.i2c_addr << 1, &buf, 1, HAL_MAX_DELAY);
+
+    // HAL_I2C_Mem_Read(baro.hi2c, baro.i2c_addr << 1, BMP581_REG_ASIC_ID, 1, &buf, 1, HAL_MAX_DELAY);
+    cli_transmit(&cli, "%x\r\n", buf);
+
     // cli_transmit(&cli, "hello world\r\n");  
-  
     // CLI Handling
     if (is_cli_uart_rx_data_available != 0) {
     cli_receive(&cli, (char *)cli_uart_rx_data,
