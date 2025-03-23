@@ -13,6 +13,7 @@
 
 // Device drivers
 #include "drivers/icm45686/icm45686.h"
+#include "drivers/adxl375/adxl375.h"
 
 // Setup CLI
 extern DMA_HandleTypeDef hdma_usart1_rx; // TODO: idk if this should be usart our uart
@@ -20,6 +21,10 @@ volatile uint8_t cli_uart_rx_data[256];
 volatile uint8_t is_cli_uart_rx_data_available;
 struct cli_handle cli;
 // struct cli_handle telemetry_cli;
+
+
+// Set up devices
+struct adxl375_device acc;
 
 int main(void) {
   init(); 
@@ -29,14 +34,23 @@ int main(void) {
   command_init(&cli);
   memset((void *)cli_uart_rx_data, 0, sizeof(cli_uart_rx_data));
 
+  // Initialize devices 
+  acc.hspi = &hspi1;
+  acc.cs_gpio_pin = SPI1_CS1_Pin;
+  acc.cs_gpio_port = SPI1_CS1_GPIO_Port;
+  uint8_t buf;
+  HAL_GPIO_WritePin(acc.cs_gpio_port, acc.cs_gpio_pin, GPIO_PIN_SET);
+
   while(1) {
     HAL_GPIO_WritePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin, GPIO_PIN_SET);
     HAL_Delay(250);
     HAL_GPIO_WritePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin, GPIO_PIN_RESET);
     HAL_Delay(250);
 
-    // cli_transmit(&cli, "hello world\r\n");  
+    adxl375_read_byte(&acc, ADXL375_REG_DEVID, &buf);
+    cli_transmit(&cli, "%x\r\n", buf);
   
+
     // CLI Handling
     if (is_cli_uart_rx_data_available != 0) {
     cli_receive(&cli, (char *)cli_uart_rx_data,

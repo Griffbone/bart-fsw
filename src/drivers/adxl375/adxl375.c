@@ -5,7 +5,7 @@ enum adxl375_err adxl375_read_byte(struct adxl375_device *device, uint8_t reg, u
     uint8_t ret;
     uint8_t tx = 0x80 | reg;
 
-    HAL_GPIO_SET(device->cs_gpio_port, device->cs_gpio_pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(device->cs_gpio_port, device->cs_gpio_pin, GPIO_PIN_RESET);
     
     ret = HAL_SPI_Transmit(device->hspi, &tx, 1, HAL_MAX_DELAY);
     if (ret != HAL_OK) {
@@ -17,7 +17,7 @@ enum adxl375_err adxl375_read_byte(struct adxl375_device *device, uint8_t reg, u
         return ADXL375_ERR_HAL;
     }
 
-    HAL_GPIO_SET(device->cs_gpio_port, device->cs_gpio_pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(device->cs_gpio_port, device->cs_gpio_pin, GPIO_PIN_SET);
 
     return ADXL375_ERR_OK;
 }
@@ -26,17 +26,14 @@ enum adxl375_err adxl375_write_byte(struct adxl375_device *device, uint8_t reg, 
     uint8_t ret;
     uint8_t tx[2] = {reg, data};
 
-    HAL_GPIO_SET(device->cs_gpio_port, device->cs_gpio_pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(device->cs_gpio_port, device->cs_gpio_pin, GPIO_PIN_RESET);
     
     ret = HAL_SPI_Transmit(device->hspi, tx, 2, HAL_MAX_DELAY);
     if (ret != HAL_OK) {
         return ADXL375_ERR_HAL;
     }
 
-    ret = HAL_GPIO_SET(device->cs_gpio_port, device->cs_gpio_pin, GPIO_PIN_SET);
-    if (ret != HAL_OK) {
-        return ADXL375_ERR_HAL;
-    }
+    HAL_GPIO_WritePin(device->cs_gpio_port, device->cs_gpio_pin, GPIO_PIN_SET);
 
     return ADXL375_ERR_OK;
 }
