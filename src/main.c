@@ -25,6 +25,7 @@ struct cli_handle cli;
 
 // Set up devices
 struct adxl375_device acc;
+struct icm45686_device imu;
 
 int main(void) {
   init(); 
@@ -38,17 +39,32 @@ int main(void) {
   acc.hspi = &hspi1;
   acc.cs_gpio_pin = SPI1_CS1_Pin;
   acc.cs_gpio_port = SPI1_CS1_GPIO_Port;
-  uint8_t buf;
   HAL_GPIO_WritePin(acc.cs_gpio_port, acc.cs_gpio_pin, GPIO_PIN_SET);
+  adxl375_write_byte(&acc, ADXL375_REG_POWER_CTL, 1 << 3);  // Turn on measurement mode
 
+  imu.hspi = &hspi1;
+  imu.cs_gpio_pin = SPI2_CS2_Pin;
+  imu.cs_gpio_port = SPI2_CS2_GPIO_Port;
+  HAL_GPIO_WritePin(imu.cs_gpio_port, imu.cs_gpio_pin, GPIO_PIN_SET);
+
+  // Dummy variables for testing
+  uint8_t az0;
+  uint8_t az1;
+  uint8_t rx;
+  uint8_t rx2;
+  int16_t az;
+  
   while(1) {
-    HAL_GPIO_WritePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin, GPIO_PIN_SET);
-    HAL_Delay(250);
-    HAL_GPIO_WritePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin, GPIO_PIN_RESET);
+    // Heartbeat LED
+    HAL_GPIO_TogglePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin);
     HAL_Delay(250);
 
-    adxl375_read_byte(&acc, ADXL375_REG_DEVID, &buf);
-    cli_transmit(&cli, "%x\r\n", buf);
+    // Test code
+    // adxl375_read_byte(&acc, ADXL375_REG_DEVID, &rx);
+    icm45686_read_byte(&imu, ICM45686_REG_WHO_AM_I, &rx);
+    icm45686_read_byte(&imu, 0x2C, &rx2);
+    
+    cli_transmit(&cli, "%x %x\r\n", rx, rx2);
   
 
     // CLI Handling
