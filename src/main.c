@@ -10,9 +10,10 @@
 #include "system/init.h"
 #include "system/spi.h"
 #include "system/usart.h"
+#include "system/i2c.h"
 
 // Device drivers
-#include "drivers/icm45686/icm45686.h"
+#include "drivers/pca9563/pca9563.h"
 
 // Setup CLI
 extern DMA_HandleTypeDef hdma_usart1_rx; // TODO: idk if this should be usart our uart
@@ -21,8 +22,18 @@ volatile uint8_t is_cli_uart_rx_data_available;
 struct cli_handle cli;
 // struct cli_handle telemetry_cli;
 
+// Setup device drivers 
+pca9563_device_t io_expander;
+
 int main(void) {
   init(); 
+
+  // Initialize IO epander 
+  io_expander.hi2c = &hi2c1;
+  pca9563_set_pin_mode(&io_expander, PCA9563_PIN_P0, PCA9563_PIN_OUTPUT);
+  pca9563_set_pin_mode(&io_expander, PCA9563_PIN_P1, PCA9563_PIN_OUTPUT);
+  pca9563_set_pin_mode(&io_expander, PCA9563_PIN_P2, PCA9563_PIN_INPUT);
+  pca9563_set_pin_mode(&io_expander, PCA9563_PIN_P3, PCA9563_PIN_OUTPUT);
 
   // Initialize debug CLI
   cli_init(&cli, &huart1);
@@ -30,12 +41,14 @@ int main(void) {
   memset((void *)cli_uart_rx_data, 0, sizeof(cli_uart_rx_data));
 
   while(1) {
+    // Toggle pin on control board
     HAL_GPIO_WritePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin, GPIO_PIN_SET);
     HAL_Delay(250);
     HAL_GPIO_WritePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin, GPIO_PIN_RESET);
     HAL_Delay(250);
 
-    // cli_transmit(&cli, "hello world\r\n");  
+    // Toggle pin on radio board
+    pca9563_set_pin(&io_expander, PCA9563_PIN_P3, PCA9563_PIN_HIGH);
   
     // CLI Handling
     if (is_cli_uart_rx_data_available != 0) {
