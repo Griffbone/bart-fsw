@@ -50,4 +50,4 @@ The ```-j$(nproc)``` flag uses all your computer's available cores so that the c
 ### Flashing code
 Once the program is built, we can flash the board using OpenOCD. We do this with the command: 
 
-**INSERT COMMAND**
+```openocd -f interface/stlink.cfg -f target/stm32l4x.cfg -c "program ./build/main/main.bin 0x08000000 verify exit reset"```
