@@ -18,6 +18,6 @@ enum pyro_err {
 enum pyro_err pyro_init();
 enum pyro_err pyro_test();
 enum pyro_err pyro_fire_channel(uint8_t channel, uint16_t delay);
-enum pyro_err pyro_sense_channel(uint8_t channel);
+enum pyro_err pyro_sense_channel(uint8_t channel, uint8_t *value);
 
 #endif /* __PYRO_H__ */

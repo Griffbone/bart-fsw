@@ -73,14 +73,14 @@ enum pyro_err pyro_fire_channel(uint8_t channel, uint16_t delay) {
     return PYRO_ERR_OK;
 }
 
-enum pyro_err pyro_sense_channel(uint8_t channel) {
+enum pyro_err pyro_sense_channel(uint8_t channel, uint8_t *value) {
     // Check for valid channel
     if ((channel == 0) || (channel > 6)) {
         return PYRO_ERR_INPUT;
     }
 
     // Sense channel
-    HAL_GPIO_ReadPin(SENSE_PORTS[channel - 1], SENSE_PINS[channel - 1]);
+    *value = HAL_GPIO_ReadPin(SENSE_PORTS[channel - 1], SENSE_PINS[channel - 1]);
 
     return PYRO_ERR_OK;
 }
