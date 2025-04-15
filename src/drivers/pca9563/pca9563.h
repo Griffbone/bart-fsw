@@ -65,9 +65,9 @@ pca9563_err_t pca9563_set_pin(pca9563_device_t *device, uint8_t pin, uint8_t val
 pca9563_err_t pca9563_read_pin(pca9563_device_t *device, uint8_t pin, uint8_t *value);
 
 // Read-address the device and read a single byte return
-pca9563_err_t pca9563_read_byte(pca9563_device_t *device, uint8_t *byte);
+pca9563_err_t pca9563_read_byte(pca9563_device_t *device, uint8_t reg, uint8_t *byte);
 
 // Write-address the device and write a single byte to the device
-pca9563_err_t pca9563_write_byte(pca9563_device_t *device, uint8_t byte);
+pca9563_err_t pca9563_write_byte(pca9563_device_t *device, uint8_t reg, uint8_t byte);
 
 #endif /* __PCA9563_H__ */

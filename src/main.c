@@ -30,15 +30,24 @@ int main(void) {
 
   // Initialize IO epander 
   io_expander.hi2c = &hi2c1;
+  io_expander.timeout = 100;
+  pca9563_write_byte(&io_expander, PCA9563_REG_CONFIG, 1 << 2);
   pca9563_set_pin_mode(&io_expander, PCA9563_PIN_P0, PCA9563_PIN_OUTPUT);
   pca9563_set_pin_mode(&io_expander, PCA9563_PIN_P1, PCA9563_PIN_OUTPUT);
   pca9563_set_pin_mode(&io_expander, PCA9563_PIN_P2, PCA9563_PIN_INPUT);
   pca9563_set_pin_mode(&io_expander, PCA9563_PIN_P3, PCA9563_PIN_OUTPUT);
-
+  
   // Initialize debug CLI
   cli_init(&cli, &huart1);
   command_init(&cli);
   memset((void *)cli_uart_rx_data, 0, sizeof(cli_uart_rx_data));
+
+  uint8_t buf;
+  uint8_t tx[2];
+  tx[0] = 0x03;
+  tx[1] = 0x00;
+
+  uint8_t rx;
 
   while(1) {
     // Toggle pin on control board
@@ -46,9 +55,6 @@ int main(void) {
     HAL_Delay(250);
     HAL_GPIO_WritePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin, GPIO_PIN_RESET);
     HAL_Delay(250);
-
-    // Toggle pin on radio board
-    pca9563_set_pin(&io_expander, PCA9563_PIN_P3, PCA9563_PIN_HIGH);
   
     // CLI Handling
     if (is_cli_uart_rx_data_available != 0) {
