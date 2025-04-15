@@ -24,6 +24,10 @@ volatile uint8_t is_cli_uart_rx_data_available;
 struct cli_handle cli;
 // struct cli_handle telemetry_cli;
 
+// Setup telemetry interface 
+volatile uint8_t telem_uart_rx_data[256];
+volatile uint8_t is_telem_rx_data_available;
+
 // Device structures 
 struct bmp581_device baro;
 pca9563_device_t io_expander;
@@ -34,7 +38,6 @@ int main(void) {
   // Initialize IO expander
   io_expander.hi2c = &hi2c1;
   io_expander.timeout = 100;
-  pca9563_write_byte(&io_expander, PCA9563_REG_CONFIG, 1 << 2);
   pca9563_set_pin_mode(&io_expander, PCA9563_PIN_P0, PCA9563_PIN_OUTPUT);
   pca9563_set_pin_mode(&io_expander, PCA9563_PIN_P1, PCA9563_PIN_OUTPUT);
   pca9563_set_pin_mode(&io_expander, PCA9563_PIN_P2, PCA9563_PIN_INPUT);
@@ -43,13 +46,13 @@ int main(void) {
   // Initialize barometer 
   baro.i2c_addr = 0x47;
   baro.hi2c = &hi2c2;
-  uint8_t buf;
   uint8_t status = bmp581_init(&baro);
-  float temp;
-  float press;
 
   // Initialize pyro hardware
   pyro_init();
+
+  // Initialize radio
+  pca9563_set_pin(&io_expander, PCA9563_PIN_P1, PCA9563_PIN_HIGH);
 
   // Initialize debug CLI
   cli_init(&cli, &huart1);
@@ -60,9 +63,13 @@ int main(void) {
   HAL_UARTEx_ReceiveToIdle_IT(&huart1, (uint8_t *)cli_uart_rx_data, sizeof(cli_uart_rx_data));
 
   // Other random shit
-  uint8_t ch_val;
+  char at_command[] = "AT\r\n";
 
   while(1) {
+    // Radio debugging
+    HAL_UART_Transmit(&huart5, (uint8_t *)at_command, sizeof(at_command)-1, HAL_MAX_DELAY);
+    HAL_Delay(250);
+
     /* ========== SENSORS ========== */
     // bmp581_read_temp(&baro, &temp);
     // bmp581_read_press(&baro, &press);
@@ -77,6 +84,11 @@ int main(void) {
       memset((void *)cli_uart_rx_data, 0, sizeof(cli_uart_rx_data));
       is_cli_uart_rx_data_available = 0;
     }
+
+    /* ========== TELEMETRY HANDLING ========== */
+    if (is_telem_rx_data_available) {
+      cli_transmit(&cli, "s\r\n", telem_uart_rx_data);
+    }
   }
 
   return 0;
@@ -88,5 +100,11 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
     is_cli_uart_rx_data_available = 1;
     HAL_UARTEx_ReceiveToIdle_IT(&huart1, (uint8_t *)cli_uart_rx_data,
                                 sizeof(cli_uart_rx_data));
+  }
+
+  if (huart->Instance == UART5) {
+    is_telem_rx_data_available = 1;
+    HAL_UARTEx_ReceiveToIdle_IT(&huart5, (uint8_t *)telem_uart_rx_data,
+                                sizeof(telem_uart_rx_data));
   }
 }
