@@ -11,12 +11,6 @@
 extern pca9563_device_t io_expander;
 
 uint8_t command_init(struct cli_handle *cli) {
-  // cli_add_command(cli, "led", "", command_led_toggle);
-  // cli_add_command(cli, "nmea", "", command_gps_nmea_toggle);
-  // // cli_add_command(cli, "pyro-fire", "fire pyro channel: pyro-fire <channel>",
-  // //                 command_pyro_fire);
-  // // cli_add_command(cli, "pyro-continuity", "read all pyro channel continuity",
-  // //                 command_pyro_read_continuity);
   cli_add_command(cli, "help", "", command_help);
   cli_add_command(cli, "clear", "", command_clear);
   cli_add_command(cli, "led", "", command_led_toggle);

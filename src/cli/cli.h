@@ -9,7 +9,7 @@
 #define CLI_MAXIMUM_NUMBER_OF_ARGUMENTS 16
 #define CLI_MAXIMUM_TRANSMIT_SIZE       256
 #define CLI_MAXIMUM_RECEIVE_SIZE        256
-#define CLI_SHELL_NAME                  "osama"
+#define CLI_SHELL_NAME                  "BART"
 
 struct cli_command;
 struct cli_handle;
