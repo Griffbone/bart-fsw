@@ -18,7 +18,7 @@
 #include "drivers/bmp581/bmp581.h"
 
 // Setup CLI
-extern DMA_HandleTypeDef hdma_usart1_rx; // TODO: idk if this should be usart our uart
+// extern DMA_HandleTypeDef hdma_usart1_rx; // TODO: idk if this should be usart our uart
 volatile uint8_t cli_uart_rx_data[256];
 volatile uint8_t is_cli_uart_rx_data_available;
 struct cli_handle cli;
@@ -55,6 +55,9 @@ int main(void) {
   command_init(&cli);
   memset((void *)cli_uart_rx_data, 0, sizeof(cli_uart_rx_data));
 
+  // Initialize CLI UART interrupt
+  HAL_UARTEx_ReceiveToIdle_IT(&huart1, (uint8_t *)cli_uart_rx_data, sizeof(cli_uart_rx_data));
+
   while(1) {
     // Toggle pin on control board
     // HAL_GPIO_TogglePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin);
@@ -83,13 +86,13 @@ int main(void) {
 
 
 // THIS WORKS
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-  is_cli_uart_rx_data_available = 1;
-  HAL_UART_Receive_IT(&huart1, (uint8_t *) cli_uart_rx_data, sizeof(cli_uart_rx_data));
+// void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+// {
+//   is_cli_uart_rx_data_available = 1;
+//   HAL_UART_Receive_IT(&huart1, (uint8_t *) cli_uart_rx_data, sizeof(cli_uart_rx_data));
 
-  HAL_GPIO_TogglePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin);
-}
+//   HAL_GPIO_TogglePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin);
+// }
 
 // void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
 //   // CLI callback
@@ -104,11 +107,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 
 // THIS DOES NOT WORK 
-// void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
-//   // CLI callback
-//   if (huart->Instance == USART1) {
-//     is_cli_uart_rx_data_available = 1;
-//     // HAL_UARTEx_ReceiveToIdle_IT(&huart1, (uint8_t *)cli_uart_rx_data,
-//     //                             sizeof(cli_uart_rx_data));
-//   }
-// }
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
+  // CLI callback
+  if (huart->Instance == USART1) {
+    is_cli_uart_rx_data_available = 1;
+    HAL_UARTEx_ReceiveToIdle_IT(&huart1, (uint8_t *)cli_uart_rx_data,
+                                sizeof(cli_uart_rx_data));
+  }
+}
