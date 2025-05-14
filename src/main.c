@@ -52,7 +52,7 @@ int main(void) {
   pyro_init();
 
   // Initialize radio
-  pca9563_set_pin(&io_expander, PCA9563_PIN_P1, PCA9563_PIN_HIGH);
+  pca9563_set_pin(&io_expander, PCA9563_PIN_P1, PCA9563_PIN_LOW);
 
   // Initialize debug CLI
   cli_init(&cli, &huart1);
@@ -67,6 +67,7 @@ int main(void) {
 
   while(1) {
     // Radio debugging
+    HAL_GPIO_TogglePin(USR_LED_1_GPIO_Port, USR_LED_1_Pin);
     HAL_UART_Transmit(&huart5, (uint8_t *)at_command, sizeof(at_command)-1, HAL_MAX_DELAY);
     HAL_Delay(250);
 
